@@ -41,7 +41,7 @@ export default function Navbar() {
       }`}
     >
       <Link to='/'>
-        <div className="flex items-center gap-2 text-xl md:text-3xl lg:text-4xl font-bold mr-auto">
+        <div className="flex items-center gap-2 text-2xl md:text-3xl lg:text-4xl font-bold mr-auto">
           <PackageOpen size={40}/>
           Tech in the Box
         </div>
