@@ -51,3 +51,21 @@ def grant_admin_priv(user_id: int, user = Depends(get_current_user), db: Session
     user_to_grant.role = "admin"
     db.commit()
     return {"message": f"User {user_to_grant.name} has been granted admin priveleges."}
+
+@user_router.patch("/revoke/{user_id}")
+def revoke_admin_priv(user_id: int, user = Depends(get_current_user), db: Session = Depends(get_db)):
+    db_user = db.query(models.Users).filter(models.Users.email == user.get('sub')).first()
+    if db_user.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized: Admin access required")
+
+    user_to_revoke = db.query(models.Users).filter(models.Users.user_id == user_id).first()
+
+    if not user_to_revoke:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if user_to_revoke.role == "user":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is already a user")
+    
+    user_to_revoke.role = "user"
+    db.commit()
+    return {"message": f"User {user_to_revoke.name} has been revoked."}
