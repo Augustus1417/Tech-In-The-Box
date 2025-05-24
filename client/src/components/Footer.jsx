@@ -42,6 +42,7 @@ export default function Footer() {
 
       <div className="text-center mt-[30px] text-[0.9em] text-[#aaa]">
         <p>&copy; 2025 Tech in the Box. All rights reserved.</p>
+        <p>Disclaimer: We only do cash on deliveries</p>
       </div>
     </footer>
   );
