@@ -32,6 +32,7 @@ export default function Accessories() {
           description={accessory.description}
           price={accessory.price}
           stock={accessory.stock}
+          imgURL={accessory.imgURL}
         />
       ))}
     </div>

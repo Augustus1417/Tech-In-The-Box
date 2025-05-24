@@ -31,6 +31,7 @@ export default function Phones() {
           description={phone.description}
           price={phone.price}
           stock={phone.stock}
+          imgURL={phone.imgURL}
         />
       ))}
     </div>

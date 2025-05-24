@@ -32,6 +32,7 @@ export default function Laptops() {
           description={laptop.description}
           price={laptop.price}
           stock={laptop.stock}
+          imgURL={laptop.imgURL}
         />
       ))}
     </div>
