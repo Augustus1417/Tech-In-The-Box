@@ -100,6 +100,20 @@ export default function Admin() {
     }
   };
 
+  const handleRevokeAdmin = async (userId) => {
+    try {
+      await axios.patch(`${config.API_URL}/api/users/revoke/${userId}`, {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      toast.success("Admin privileges revoked!");
+      fetchData("users", setUsers);
+    } catch (error) {
+      toast.error("Failed to revoke admin privileges");
+    }
+  };
+
   return (
     <div className="bg-white text-black shadow-2xl p-6 sm:p-8 md:p-10 rounded-2xl m-6 sm:m-10 lg:m-20 mt-24">
       <ToastContainer position='bottom-right'/>
@@ -171,6 +185,7 @@ export default function Admin() {
               handleDeleteUser={handleDeleteUser}
               handleGrantAdmin={handleGrantAdmin}
               grantingAdmin={grantingAdmin}  
+              handleRevokeAdmin={handleRevokeAdmin}
             />
           )
         )}
