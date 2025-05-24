@@ -7,6 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 export default function Cart() {
   const [addressList, setAddressList] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState("");
+  const [total, setTotal] = useState(0);
   const cartRef = useRef();
 
   const fetchAddresses = async () => {
@@ -22,6 +23,12 @@ export default function Cart() {
       }
     } catch (err) {
       setAddressList([]);
+    }
+  };
+
+  const updateTotal = () => {
+    if (cartRef.current && typeof cartRef.current.getTotal === "function") {
+      setTotal(cartRef.current.getTotal());
     }
   };
 
@@ -45,7 +52,8 @@ export default function Cart() {
       setSelectedAddress("");
 
       if (cartRef.current) {
-        cartRef.current.refetch(); 
+        cartRef.current.refetch();
+        updateTotal();
       }
     } catch (error) {
       console.error("Order creation failed:", error);
@@ -55,6 +63,8 @@ export default function Cart() {
 
   useEffect(() => {
     fetchAddresses();
+    const timeout = setTimeout(updateTotal, 500);
+    return () => clearTimeout(timeout);
   }, []);
 
   return (
@@ -62,7 +72,11 @@ export default function Cart() {
       <ToastContainer position="bottom-right" />
       <h1 className="text-4xl font-bold mb-8">Cart</h1>
 
-      <CartList ref={cartRef} />
+      <CartList ref={cartRef} onCartUpdate={(newTotal) => setTotal(newTotal)} />
+
+      <p className="text-right text-lg font-bold mb-6">
+        Cart Total: ₱{total.toLocaleString()}
+      </p>
 
       <p className="text-gray-600 mb-4">You can manage your addresses in the Account tab</p>
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
@@ -87,5 +101,4 @@ export default function Cart() {
       </div>
     </div>
   );
-
 }

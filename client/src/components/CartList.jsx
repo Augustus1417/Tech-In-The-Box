@@ -10,9 +10,16 @@ import axios from "axios";
 import config from "../config";
 import { ToastContainer, toast } from "react-toastify";
 
-const CartList = forwardRef((props, ref) => {
+const CartList = forwardRef(({ onCartUpdate }, ref) => {
   const [cartData, setCartData] = useState([]);
   const token = localStorage.getItem("token");
+
+  const calculateTotal = (data) => {
+    return data.reduce(
+      (acc, item) => acc + item.product_price * item.quantity,
+      0
+    );
+  };
 
   const fetchCartData = useCallback(() => {
     axios
@@ -21,12 +28,20 @@ const CartList = forwardRef((props, ref) => {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setCartData(res.data))
+      .then((res) => {
+        setCartData(res.data);
+        if (onCartUpdate) {
+          onCartUpdate(calculateTotal(res.data));
+        }
+      })
       .catch((err) => console.error("Error loading cart data:", err));
-  }, [token]);
+  }, [token, onCartUpdate]);
+
+  const getTotalPrice = () => calculateTotal(cartData);
 
   useImperativeHandle(ref, () => ({
     refetch: fetchCartData,
+    getTotal: getTotalPrice,
   }));
 
   const handleDelete = async (cartId) => {
@@ -58,12 +73,15 @@ const CartList = forwardRef((props, ref) => {
             key={item.cart_id}
             className="flex flex-col sm:flex-row items-center sm:items-start bg-white rounded-2xl p-4 shadow-md gap-4"
           >
-            {/* Image section */}
-            <div className="w-24 h-24 bg-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-sm shrink-0">
-              IMG
-            </div>
+            <img
+              src={
+                item.imgURL ||
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGh5WFH8TOIfRKxUrIgJZoDCs1yvQ4hIcppw&s"
+              }
+              alt={item.product_name}
+              className="w-24 h-24 object-cover rounded-xl border-2 border-black shrink-0"
+            />
 
-            {/* Details */}
             <div className="flex-1 w-full">
               <h2 className="text-lg font-bold text-gray-800">{item.product_name}</h2>
               <p className="text-sm text-gray-600">
@@ -77,7 +95,6 @@ const CartList = forwardRef((props, ref) => {
               </p>
             </div>
 
-            {/* Delete icon */}
             <button
               onClick={() => handleDelete(item.cart_id)}
               className="text-red-500 hover:text-red-700 transition-colors"

@@ -28,7 +28,7 @@ export default function OrderCard({ order, onCancel }) {
           {order.delivery_date && (
             <p className="text-sm text-gray-600">Delivery: {new Date(order.delivery_date).toLocaleString()}</p>
           )}
-          <p className="text-sm text-gray-600">Total: ₱{order.total_price}</p>
+          <p className="text-sm text-gray-600">Total: ₱{order.total_price.toLocaleString()}</p>
         </div>
 
         {/* Hide cancel button if the order is delivered or cancelled */}
