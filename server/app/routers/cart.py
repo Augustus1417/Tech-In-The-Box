@@ -39,6 +39,7 @@ def get_user_cart(user = Depends(get_current_user), db: Session = Depends(get_db
         cart_data.append({
             "cart_id": item.cart_id,
             "product_id": item.product_id,
+            "imgURL": item.product.imgURL,
             "product_name": item.product.name,
             "product_price": item.product.price,
             "quantity": item.quantity,
