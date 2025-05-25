@@ -54,7 +54,7 @@ class Orders(Base):
     delivery_date = Column(DateTime, nullable=True)
 
     user = relationship("Users", back_populates="orders")
-    order_items = relationship("Order_Items", back_populates="order")
+    order_items = relationship("Order_Items", back_populates="order", cascade="all, delete-orphan")
 
 class Order_Items(Base):
     __tablename__ = 'order_items'
