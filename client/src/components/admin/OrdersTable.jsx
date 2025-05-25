@@ -3,6 +3,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import config from '../../config';
+import { Pencil, Trash } from "lucide-react";
 
 const OrdersTable = ({ orders, setOrders }) => {
   const [loadingId, setLoadingId] = useState(null);
@@ -59,6 +60,29 @@ const OrdersTable = ({ orders, setOrders }) => {
     } catch (err) {
       console.error("Error while delivering order:", err.response || err);
       toast.error(err.response?.data?.detail || "Error delivering order.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    setLoadingId(orderId);
+    try {
+      const response = await axios.delete(`${config.API_URL}/api/orders/delete/${orderId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.status === 204) {
+        setOrders((prevOrders) => prevOrders.filter((order) => order.order_id !== orderId));
+        toast.success(`Order ${orderId} has been deleted.`);
+      } else {
+        throw new Error('Unexpected response status');
+      }
+    } catch (err) {
+      console.error("Error while deleting order:", err.response || err);
+      toast.error(err.response?.data?.detail || "Error deleting order.");
     } finally {
       setLoadingId(null);
     }
@@ -128,33 +152,46 @@ const OrdersTable = ({ orders, setOrders }) => {
                       ))}
                     </ul>
                   </td>
-                  <td className="px-4 py-2 border-b whitespace-nowrap space-y-1">
-                    {order.status === 'pending' && (
+                  <td className="px-4 py-2 border-b whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {order.status === 'pending' && (
+                        <button
+                          onClick={() => handleShipOrder(order.order_id)}
+                          disabled={loadingId === order.order_id}
+                          className={`px-3 py-1 rounded-md text-white ${
+                            loadingId === order.order_id
+                              ? 'bg-green-400 cursor-not-allowed'
+                              : 'bg-green-600 hover:bg-green-700'
+                          }`}
+                        >
+                          Ship
+                        </button>
+                      )}
+                      {order.status === 'shipped' && (
+                        <button
+                          onClick={() => handleDeliverOrder(order.order_id)}
+                          disabled={loadingId === order.order_id}
+                          className={`px-3 py-1 rounded-md text-white ${
+                            loadingId === order.order_id
+                              ? 'bg-blue-400 cursor-not-allowed'
+                              : 'bg-blue-600 hover:bg-blue-700'
+                          }`}
+                        >
+                          Deliver
+                        </button>
+                      )}
                       <button
-                        onClick={() => handleShipOrder(order.order_id)}
+                        onClick={() => handleDeleteOrder(order.order_id)}
                         disabled={loadingId === order.order_id}
-                        className={`px-3 py-1 rounded-md text-white ${
+                        className={`p-2 rounded-md text-white ${
                           loadingId === order.order_id
-                            ? 'bg-green-400 cursor-not-allowed'
-                            : 'bg-green-600 hover:bg-green-700'
+                            ? 'bg-red-400 cursor-not-allowed'
+                            : 'bg-red-600 hover:bg-red-700'
                         }`}
                       >
-                        Ship
+                        <Trash size={16} />
                       </button>
-                    )}
-                    {order.status === 'shipped' && (
-                      <button
-                        onClick={() => handleDeliverOrder(order.order_id)}
-                        disabled={loadingId === order.order_id}
-                        className={`px-3 py-1 rounded-md text-white ${
-                          loadingId === order.order_id
-                            ? 'bg-blue-400 cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700'
-                        }`}
-                      >
-                        Deliver
-                      </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}

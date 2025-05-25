@@ -172,3 +172,24 @@ def set_to_delivered(order_id: int, db: Session = Depends(get_db), user = Depend
         return {"message": f"Order {order_id} has been delivered."}
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{order.status}")
+
+@order_router.delete("/delete/{order_id}")
+def delete_order(order_id: int, user = Depends(get_current_user), db: Session = Depends(get_db)):
+    order = db.query(models.Orders).filter(models.Orders.order_id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+
+    if order.status == models.OrderStatus.pending or order.status == models.OrderStatus.shipped:
+        for item in order.order_items:
+            product = db.query(models.Products).filter(models.Products.product_id == item.product_id).first()
+            if product:
+                product.stock += item.quantity
+
+    db_user = db.query(models.Users).filter(models.Users.email == user.get('sub')).first()
+
+    if db_user.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unauthorized, you are not an admin")
+
+    db.delete(order)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
