@@ -1,18 +1,24 @@
-# frontend/Dockerfile
-FROM node:23-alpine
+FROM node:20 AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+# Install deps
+COPY package*.json ./
 RUN npm install
 
+# Copy source
 COPY . .
 
+# Build React app (Vite will use VITE_API_URL from .env)
 RUN npm run build
 
-# Serve with nginx
-FROM nginx:stable-alpine as production
-COPY --from=0 /app/build /usr/share/nginx/html
+FROM nginx:alpine
 
+# Copy build output to Nginx web root
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expose port 80 for the web app
 EXPOSE 80
+
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
