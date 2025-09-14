@@ -13,13 +13,13 @@ for i in range(10):
     try:
         conn = engine.connect()
         conn.close()
-        print("✅ Database ready")
+        print("Database ready")
         break
     except OperationalError:
-        print("⏳ Database not ready, retrying...")
+        print("Database not ready, retrying...")
         time.sleep(3)
 else:
-    raise Exception("❌ Could not connect to the database")
+    raise Exception("Could not connect to the database")
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
